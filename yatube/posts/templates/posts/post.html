@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}{{ post.text|truncatewords:2 }}{% endblock %}
+{% block content %}
+
+<main role="main" class="container">
+  <div class="row">
+    <div class="col-md-3 mb-3 mt-1">
+      {% include "posts/include/author_card.html" with author=author %}
+    </div>
+    <div class="col-md-9">
+      {% include "posts/include/post_card.html" with post=post author=author %}
+      {% include "posts/include/comments.html" with post=post author=author %}
+    </div>
+  </div>
+</main>
+
+{% endblock %}
