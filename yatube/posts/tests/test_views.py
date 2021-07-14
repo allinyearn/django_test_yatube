@@ -3,6 +3,7 @@ import tempfile
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls.base import reverse
@@ -63,6 +64,7 @@ class ViewsTests(TestCase):
     def setUp(self):
         self.post_author_client = Client()
         self.post_author_client.force_login(ViewsTests.author)
+        cache.clear()
 
     @classmethod
     def tearDownClass(cls):
@@ -157,3 +159,18 @@ class ViewsTests(TestCase):
                     len(response.context.get('page').object_list),
                     spare
                 )
+
+    def test_cache_index(self):
+        Post.objects.create(
+            text='Test cache post',
+            author=ViewsTests.author,
+        )
+        response = self.post_author_client.get(reverse('index'))
+        cache_before = response.content
+        Post.objects.create(
+            text='Test cache post 2',
+            author=ViewsTests.author,
+        )
+        response = self.post_author_client.get(reverse('index'))
+        cache_after = response.content
+        self.assertEqual(cache_before, cache_after)

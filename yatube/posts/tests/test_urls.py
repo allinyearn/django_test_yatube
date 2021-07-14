@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.test import Client, TestCase
 
 from ..models import Group, Post
@@ -42,6 +43,7 @@ class PostsURLTests(TestCase):
         self.post_author_client = Client()
         self.authorized_client.force_login(PostsURLTests.user)
         self.post_author_client.force_login(PostsURLTests.author)
+        cache.clear()
 
     def test_accessibility_of_public_pages(self):
         for url, _ in PostsURLTests.public_urls:
