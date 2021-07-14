@@ -30,7 +30,7 @@ class Post(models.Model):
         related_name='groups'
     )
     image = models.ImageField(
-        upload_to='',
+        upload_to='posts/',
         blank=True,
         null=True
     )

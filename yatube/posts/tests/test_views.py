@@ -79,11 +79,10 @@ class ViewsTests(TestCase):
         post_text = first_object.text
         post_author = first_object.author
         post_group = first_object.group
-        post_image = first_object.image
         self.assertEqual(post_text, ViewsTests.post.text)
         self.assertEqual(post_author, ViewsTests.author)
         self.assertEqual(post_group, ViewsTests.group)
-        self.assertEqual(post_image, ViewsTests.image)
+        self.assertContains(response, '<img')
 
     def test_pages_uses_correct_template(self):
         for reverse_name, template in (

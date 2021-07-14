@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
 from .forms import CommentForm, PostForm
-from .models import Group, Post, User
+from .models import Group, Post, Follow, User
 
 
 @cache_page(20)
@@ -129,19 +129,24 @@ def add_comment(request, username, post_id):
 
 @login_required
 def follow_index(request):
-    # здесь все посты авторов на которых подписан юзер
-    # информация о текущем пользователе доступна в переменной request.user
-    # ...
-    return render(request, "follow.html", {...})
+    post_list = Post.objects.filter(author=Follow.author)
+    paginator = Paginator(post_list, settings.PAGES_AMOUNT)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    return render(request, 'posts/follow.html', {'page': page})
 
 
 @login_required
 def profile_follow(request, username):
-    # здесь подписка
-    pass
+    author = get_object_or_404(User, username=username)
+    if author != request.user:
+        Follow.objects.get_or_create(author=author, user=request.user)
+    return redirect('profile', username)
 
 
 @login_required
 def profile_unfollow(request, username):
-    # здесь отписка
-    pass
+    author = get_object_or_404(User, username=username)
+    if author != request.user:
+        Follow.objects.filter(author=author, user=request.user).delete()
+    return redirect('profile', username)
