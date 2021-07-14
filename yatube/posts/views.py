@@ -125,3 +125,23 @@ def add_comment(request, username, post_id):
     comment.post = post
     comment.save()
     return redirect('post', username, post_id)
+
+
+@login_required
+def follow_index(request):
+    # здесь все посты авторов на которых подписан юзер
+    # информация о текущем пользователе доступна в переменной request.user
+    # ...
+    return render(request, "follow.html", {...})
+
+
+@login_required
+def profile_follow(request, username):
+    # здесь подписка
+    pass
+
+
+@login_required
+def profile_unfollow(request, username):
+    # здесь отписка
+    pass
