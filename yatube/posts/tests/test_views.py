@@ -1,5 +1,6 @@
 import shutil
 import tempfile
+from http import HTTPStatus
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -9,7 +10,7 @@ from django.test import Client, TestCase
 from django.urls.base import reverse
 
 from ..forms import PostForm
-from ..models import Group, Post
+from ..models import Follow, Group, Post
 
 User = get_user_model()
 
@@ -40,13 +41,31 @@ class ViewsTests(TestCase):
         cls.author = User.objects.create_user(
             username='LionUser'
         )
+        cls.non_author = User.objects.create_user(
+            username='LionUserFan'
+        )
         cls.post = Post.objects.create(
             text='Some text about lions',
             author=cls.author,
             group=cls.group,
             image=cls.image,
         )
+        cls.follow = Follow.objects.create(
+            user=cls.non_author,
+            author=cls.author,
+        )
         cls.url_index = reverse('index')
+        cls.url_follow_index = reverse('follow_index')
+        cls.url_comment = reverse(
+            'add_comment',
+            kwargs={'username': cls.author.username, 'post_id': cls.post.id}
+        )
+        cls.follow_urls = (
+            reverse('profile_follow',
+                    kwargs={'username': cls.author.username}),
+            reverse('profile_unfollow',
+                    kwargs={'username': cls.author.username}),
+        )
         cls.public_urls = (
             (cls.url_index, 'posts/index.html'),
             (reverse('group_posts', kwargs={'slug': cls.group.slug}),
@@ -62,8 +81,11 @@ class ViewsTests(TestCase):
         )
 
     def setUp(self):
+        self.guest_clent = Client()
         self.post_author_client = Client()
+        self.non_author = Client()
         self.post_author_client.force_login(ViewsTests.author)
+        self.non_author.force_login(ViewsTests.non_author)
         cache.clear()
 
     @classmethod
@@ -173,3 +195,22 @@ class ViewsTests(TestCase):
         response = self.post_author_client.get(reverse('index'))
         cache_after = response.content
         self.assertEqual(cache_before, cache_after)
+
+    def test_authorized_user_comment(self):
+        response = self.guest_clent.get(ViewsTests.url_comment)
+        self.assertNotEqual(response.status_code, HTTPStatus.OK)
+
+    def new_post_only_for_followers(self):
+        test_post = Post.objects.create(
+            text='Test post for followers',
+            author=ViewsTests.author,
+        )
+        response = self.non_author.get(ViewsTests.url_follow_index)
+        first_object = response.context['page'][0]
+        self.assertEqual(first_object.text, test_post.text)
+
+    def test_authorized_user_follow_unfollow(self):
+        for follow_url in ViewsTests.follow_urls:
+            with self.subTest(follow_url=follow_url):
+                response = self.guest_clent.get(follow_url)
+                self.assertNotEqual(response.status_code, HTTPStatus.OK)
