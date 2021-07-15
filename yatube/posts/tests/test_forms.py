@@ -104,19 +104,29 @@ class FormTests(TestCase):
                 self.assertIsInstance(form_field, expected)
 
     def test_new_comment_exist(self):
-        posts_count = Comment.objects.count()
+        post = Post.objects.create(
+            text='Test post for comment',
+            author=FormTests.author,
+        )
+        comment_count = Comment.objects.count()
         form_data = {
+            'post': post,
+            'author': FormTests.author,
             'text': 'Testing new post creation',
-            'group': FormTests.group.id,
-            'image': FormTests.uploaded,
         }
         self.authorized_client.post(
-            reverse('new_post'),
+            reverse(
+                'add_comment',
+                kwargs={
+                    'username': FormTests.author.username,
+                    'post_id': post.id,
+                }
+            ),
             data=form_data,
             follow=True
         )
-        new_post = Post.objects.first()
-        self.assertEqual(Post.objects.count(), posts_count + 1)
-        self.assertEqual(new_post.text, form_data['text'])
-        self.assertEqual(new_post.author, FormTests.author)
-        self.assertEqual(new_post.group.id, form_data['group'])
+        new_comment = Comment.objects.first()
+        self.assertEqual(Comment.objects.count(), comment_count + 1)
+        self.assertEqual(new_comment.text, form_data['text'])
+        self.assertEqual(new_comment.author, FormTests.author)
+        self.assertEqual(new_comment.post.id, form_data['post'].id)
