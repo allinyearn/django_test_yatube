@@ -4,7 +4,7 @@
 {% block content %}
 
   <div class="container">
-    {% include "posts/include/menu.html" with index=True %}
+    {% include "posts/include/menu.html" with follow=True %}
     {% for post in page %}
       {% include "posts/include/post_card.html" with post=post %}
     {% endfor %}
