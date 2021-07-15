@@ -5,9 +5,12 @@
 
   <div class="container">
     {% include "posts/include/menu.html" with index=True %}
-    {% for post in page %}
-      {% include "posts/include/post_card.html" with post=post %}
-    {% endfor %}
+    {% load cache %}
+    {% cache 20 index_page %}
+      {% for post in page %}
+        {% include "posts/include/post_card.html" with post=post %}
+      {% endfor %}
+    {% endcache %}
   </div>
 
   {% include "paginator.html" with items=page paginator=paginator%}
