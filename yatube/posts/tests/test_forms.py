@@ -9,7 +9,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Comment, Group, Post
 
 User = get_user_model()
 
@@ -102,3 +102,21 @@ class FormTests(TestCase):
             with self.subTest(value=value):
                 form_field = response.context['form'].fields[value]
                 self.assertIsInstance(form_field, expected)
+
+    def test_new_comment_exist(self):
+        posts_count = Comment.objects.count()
+        form_data = {
+            'text': 'Testing new post creation',
+            'group': FormTests.group.id,
+            'image': FormTests.uploaded,
+        }
+        self.authorized_client.post(
+            reverse('new_post'),
+            data=form_data,
+            follow=True
+        )
+        new_post = Post.objects.first()
+        self.assertEqual(Post.objects.count(), posts_count + 1)
+        self.assertEqual(new_post.text, form_data['text'])
+        self.assertEqual(new_post.author, FormTests.author)
+        self.assertEqual(new_post.group.id, form_data['group'])

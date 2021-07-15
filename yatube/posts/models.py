@@ -57,6 +57,12 @@ class Comment(models.Model):
         auto_now_add=True
     )
 
+    class Meta():
+        ordering = ['-created']
+
+    def __str__(self):
+        return self.text[:10]
+
 
 class Follow(models.Model):
     user = models.ForeignKey(

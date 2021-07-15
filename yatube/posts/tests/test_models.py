@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from ..models import Group, Post
+from ..models import Comment, Group, Post
 
 User = get_user_model()
 
@@ -22,6 +22,11 @@ class ModelTests(TestCase):
             slug='lion',
             description='Lions fans are here',
         )
+        cls.comment = Comment.objects.create(
+            post=cls.post,
+            author=cls.author,
+            text='Test comment',
+        )
 
     def test_post_str_method(self):
         post = ModelTests.post
@@ -32,3 +37,8 @@ class ModelTests(TestCase):
         group = ModelTests.group
         expected_object_name = group.title
         self.assertEqual(expected_object_name, str(group))
+
+    def test_comment_str_method(self):
+        comment = ModelTests.comment
+        expected_object_name = comment.text[:10]
+        self.assertEqual(expected_object_name, str(comment))

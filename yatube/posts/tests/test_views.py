@@ -196,11 +196,11 @@ class ViewsTests(TestCase):
         cache_after = response.content
         self.assertEqual(cache_before, cache_after)
 
-    def test_authorized_user_comment(self):
-        response = self.guest_clent.get(ViewsTests.url_comment)
-        self.assertNotEqual(response.status_code, HTTPStatus.OK)
+    def test_not_authorized_user_comment(self):
+        response = self.guest_clent.post(ViewsTests.url_comment)
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
-    def new_post_only_for_followers(self):
+    def test_new_post_only_for_followers(self):
         test_post = Post.objects.create(
             text='Test post for followers',
             author=ViewsTests.author,
