@@ -229,40 +229,27 @@ class ViewsTests(TestCase):
         self.assertEqual(len(objects.object_list), 0)
 
     def test_authorized_user_follow(self):
+        followers_count = ViewsTests.author.following.count()
         response = self.just_user.get(ViewsTests.url_follow)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(
+            response,
+            response.url,
+            status_code=HTTPStatus.FOUND,
+            target_status_code=HTTPStatus.OK,
+            fetch_redirect_response=True
+        )
+        self.assertEqual(ViewsTests.author.following.count(),
+                         followers_count + 1)
 
     def test_authorized_user_unfollow(self):
+        followers_count = ViewsTests.author.following.count()
         response = self.follower.get(ViewsTests.url_unfollow)
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-
-    # изначально хотел проверить таким образом, но так и не понял,
-    # почему подписки не посчитались (не создались)
-
-    # def test_authorized_user_follow(self):
-    #     author = ViewsTests.author
-    #     followers_count = author.follower.count()
-    #     response = self.just_user.get(ViewsTests.url_follow)
-    #     self.assertRedirects(
-    #         response,
-    #         response.url,
-    #         status_code=HTTPStatus.FOUND,
-    #         target_status_code=HTTPStatus.OK,
-    #         fetch_redirect_response=True
-    #     )
-    #     self.assertEqual(author.follower.count(),
-    #                      followers_count + 1)
-
-    # def test_authorized_user_unfollow(self):
-    #     author = ViewsTests.author
-    #     followers_count = author.follower.count()
-    #     response = self.follower.get(ViewsTests.url_unfollow)
-    #     self.assertRedirects(
-    #         response,
-    #         response.url,
-    #         status_code=HTTPStatus.FOUND,
-    #         target_status_code=HTTPStatus.OK,
-    #         fetch_redirect_response=True
-    #     )
-    #     self.assertEqual(author.follower.count(),
-    #                      followers_count - 1)
+        self.assertRedirects(
+            response,
+            response.url,
+            status_code=HTTPStatus.FOUND,
+            target_status_code=HTTPStatus.OK,
+            fetch_redirect_response=True
+        )
+        self.assertEqual(ViewsTests.author.following.count(),
+                         followers_count - 1)
