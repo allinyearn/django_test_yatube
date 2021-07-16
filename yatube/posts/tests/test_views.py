@@ -70,6 +70,10 @@ class ViewsTests(TestCase):
             'profile_unfollow',
             kwargs={'username': cls.author.username}
         )
+        cls.url_profile = reverse(
+            'profile',
+            kwargs={'username': cls.author.username}
+        )
         cls.public_urls = (
             (cls.url_index, 'posts/index.html'),
             (reverse('group_posts', kwargs={'slug': cls.group.slug}),
@@ -233,7 +237,7 @@ class ViewsTests(TestCase):
         response = self.just_user.get(ViewsTests.url_follow)
         self.assertRedirects(
             response,
-            response.url,
+            ViewsTests.url_profile,
             status_code=HTTPStatus.FOUND,
             target_status_code=HTTPStatus.OK,
             fetch_redirect_response=True
@@ -246,7 +250,7 @@ class ViewsTests(TestCase):
         response = self.follower.get(ViewsTests.url_unfollow)
         self.assertRedirects(
             response,
-            response.url,
+            ViewsTests.url_profile,
             status_code=HTTPStatus.FOUND,
             target_status_code=HTTPStatus.OK,
             fetch_redirect_response=True
