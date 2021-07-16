@@ -110,8 +110,6 @@ class FormTests(TestCase):
         )
         comment_count = Comment.objects.count()
         form_data = {
-            'post': post,
-            'author': FormTests.author,
             'text': 'Testing new post creation',
         }
         self.authorized_client.post(
@@ -129,4 +127,4 @@ class FormTests(TestCase):
         self.assertEqual(Comment.objects.count(), comment_count + 1)
         self.assertEqual(new_comment.text, form_data['text'])
         self.assertEqual(new_comment.author, FormTests.author)
-        self.assertEqual(new_comment.post.id, form_data['post'].id)
+        self.assertEqual(new_comment.post.id, post.id)
