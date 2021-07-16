@@ -19,7 +19,7 @@
           Количество постов: {{ author.posts.count }}
         </div>
       </li>
-      {% if request.user != author and not is_anonymous %}
+      {% if request.user != author and request.user.is_authenticated %}
         <li class="list-group-item">
           {% if following %}
             <a
